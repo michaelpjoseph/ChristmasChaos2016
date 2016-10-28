@@ -2,11 +2,12 @@
 //  2016 Christmas Light display
 
 
-#include <Adafruit_NeoPixel.h>
+//#include <Adafruit_NeoPixel.h>
+
+#include "FastLED.h"
+
 #define NUMPIX 50
 #define LEDPIN 3
-
-
 
 struct PIX {
   int R;
@@ -15,13 +16,24 @@ struct PIX {
 };
 PIX PIXARR[NUMPIX];   // master array to be dumped to strand on each redraw
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIX, LEDPIN, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIX, LEDPIN, NEO_GRB + NEO_KHZ800);   // un-comment for single strand operation
+
+//Adafruit_NeoPixel strip_1 = Adafruit_NeoPixel(NUMPIX, 2, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel strip_2 = Adafruit_NeoPixel(NUMPIX, 3, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel strip_3 = Adafruit_NeoPixel(NUMPIX, 8, NEO_GRB + NEO_KHZ800);
+
+CRGB leds[NUMPIX];  //array of LEDs
+
 
 void strip_FlushAndDisplay() {
   for (int a = 0; a < NUMPIX; a++) {
-    strip.setPixelColor( a, PIXARR[a].R, PIXARR[a].G, PIXARR[a].B);
+    //strip.setPixelColor( a, PIXARR[a].R, PIXARR[a].G, PIXARR[a].B); // single strand operation
+    leds[a] = CRGB(PIXARR[a].R, PIXARR[a].G, PIXARR[a].B);
   }
-  strip.show();
+  FastLED.show();
+  //strip_1.show();
+  //strip_2.show();
+  //strip_3.show();
 }
 
 void listPIXARR() {  // DEBUG - dump pixel array
@@ -143,6 +155,7 @@ void scdisplay_PopInFadeOut(unsigned int duration) {
 }
 
 void scdisplay_PIXVector_snake(int length, int snakes, int duration) {
+  initPIXARR_null();
   if ((snakes * length) >= NUMPIX) {  //check for crazy inputs and set fallback defaults
     snakes = 2;
     length = 5;
@@ -193,8 +206,8 @@ void scdisplay_PIXVector_snake(int length, int snakes, int duration) {
         //cout << a << " " << b << "   forward\n";
         currbrightness += section_increment;
         PIXVECT[a][b].R = currbrightness;
-        PIXVECT[a][b].G = currbrightness;
-        PIXVECT[a][b].B = currbrightness;
+        PIXVECT[a][b].G = 0;
+        PIXVECT[a][b].B = 0;
         //        PIXVECT[a][b].R = a + 10;
         //        PIXVECT[a][b].G = a + 10;
         //        PIXVECT[a][b].B = a + 10;
@@ -207,9 +220,9 @@ void scdisplay_PIXVector_snake(int length, int snakes, int duration) {
       int currposition = idx_R;
       for (int b = (length - 1) ; b >= 0; b--) {
         currbrightness += section_increment;
-        PIXVECT[a][b].R = currbrightness;
+        PIXVECT[a][b].R = 0;
         PIXVECT[a][b].G = currbrightness;
-        PIXVECT[a][b].B = currbrightness;
+        PIXVECT[a][b].B = 0;
         //        PIXVECT[a][b].R = a + 10;
         //        PIXVECT[a][b].G = a + 10;
         //        PIXVECT[a][b].B = a + 10;
@@ -243,7 +256,7 @@ void scdisplay_PIXVector_snake(int length, int snakes, int duration) {
     for (int d = 0; d < snakes; d++) {  // draw the snakes to the array - outer object loop
       for (int e = 0; e < length; e++) {  // inner element loop
         if (PIXARR[PIXVECT[d][e].pos].R != 0) {  // add collision detection here if PIXAR[pos].r / g / b > 0
-          PIXARR[PIXVECT[d][e].pos] = { 555, 555, 555 };
+          PIXARR[PIXVECT[d][e].pos] = { 255, 255, 255 };
         } else {  // no collission
           PIXARR[PIXVECT[d][e].pos] = {PIXVECT[d][e].R, PIXVECT[d][e].G, PIXVECT[d][e].B };
         }
@@ -253,7 +266,7 @@ void scdisplay_PIXVector_snake(int length, int snakes, int duration) {
     //listPIXARR();
     
     strip_FlushAndDisplay();
-    delay(100);
+    delay(50);
     for (int m = 0; m < snakes; m++) {  // move the snakes
       for (int e = 0; e < length; e++) {  // inner element loop
         PIXVECT[m][e].pos += PIXVECT[m][e].dir;
@@ -308,17 +321,23 @@ void scdisplay_PIXVector_linedots(int duration) {
   int section_increment = maxbrightness / fadepixels;
   for (int a = 0; a < fadepixels; a++) {  // fade left line
     currbrightness += section_increment;
+//    PIXVECT[a].R = currbrightness;
+//    PIXVECT[a].G = currbrightness;
+//    PIXVECT[a].B = currbrightness;
     PIXVECT[a].R = currbrightness;
-    PIXVECT[a].G = currbrightness;
-    PIXVECT[a].B = currbrightness;
+    PIXVECT[a].G = 0;
+    PIXVECT[a].B = 0;
     PIXVECT[a].pos = currposition;
     PIXVECT[a].dir = 1;
     currposition += 1;
   }
   for (int a = currposition; a < (halfway - fadepixels); a++) {  // bright center of left line
-    PIXVECT[a].R = maxbrightness;
-    PIXVECT[a].G = maxbrightness;
-    PIXVECT[a].B = maxbrightness;
+//    PIXVECT[a].R = maxbrightness;
+//    PIXVECT[a].G = maxbrightness;
+//    PIXVECT[a].B = maxbrightness;
+    PIXVECT[a].R = currbrightness;
+    PIXVECT[a].G = 0;
+    PIXVECT[a].B = 0;
     PIXVECT[a].pos = currposition;
     PIXVECT[a].dir = 1;
     currposition += 1;
@@ -326,8 +345,10 @@ void scdisplay_PIXVector_linedots(int duration) {
   for (int a = currposition; a < halfway; a++) {  // bright center of left line
     currbrightness -= section_increment;
     PIXVECT[a].R = currbrightness;
-    PIXVECT[a].G = currbrightness;
-    PIXVECT[a].B = currbrightness;
+    PIXVECT[a].G = 0;
+    PIXVECT[a].B = 0;
+    //PIXVECT[a].G = currbrightness;
+    //PIXVECT[a].B = currbrightness;
     PIXVECT[a].pos = currposition;
     PIXVECT[a].dir = 1;
     currposition += 1;
@@ -337,9 +358,13 @@ void scdisplay_PIXVector_linedots(int duration) {
 
   // draw dot portion
   for (int a = (NUMPIX - 1) ; a >  halfway; a -= dotsep) {
-    PIXVECT[a].R = maxbrightness;
+    PIXVECT[a].R = 0;
     PIXVECT[a].G = maxbrightness;
-    PIXVECT[a].B = maxbrightness;
+    PIXVECT[a].B = 0;
+    
+//    PIXVECT[a].R = maxbrightness;
+//    PIXVECT[a].G = maxbrightness;
+//    PIXVECT[a].B = maxbrightness;
     PIXVECT[a].pos = a;
     PIXVECT[a].dir = -1;
   }
@@ -364,7 +389,7 @@ void scdisplay_PIXVector_linedots(int duration) {
     for (int d = 0; d < NUMPIX; d++) {  // draw the snakes to the array - outer object loop
       if (PIXVECT[d].dir != 0) {
         if (PIXARR[PIXVECT[d].pos].R != 0) {  // add collision detection here if PIXAR[pos].r / g / b > 0
-          PIXARR[PIXVECT[d].pos] = { 999, 999, 999 };
+          PIXARR[PIXVECT[d].pos] = { 255, 255, 255 };
         } else {  // no collission
           PIXARR[PIXVECT[d].pos] = {PIXVECT[d].R, PIXVECT[d].G, PIXVECT[d].B };
         }
@@ -437,7 +462,14 @@ void decrPIXARR_looper(int times) {
 
 
 void setup() {
-  strip.begin();
+  delay(2000);
+  //strip.begin();
+//  strip_1.begin();
+//  strip_2.begin();
+//  strip_3.begin();
+  FastLED.addLeds<WS2811, 2, RGB>(leds, NUMPIX);
+  FastLED.addLeds<WS2811, 3, RGB>(leds, NUMPIX);
+  FastLED.addLeds<WS2811, 4, RGB>(leds, NUMPIX);
   Serial.begin(9600);
 }
 
@@ -446,13 +478,14 @@ void loop() {
   incrPIXARR_looper(10);
   decrPIXARR_looper(50);
   initPIXARR_sparse(10);
-  incrPIXARR_looper(10);
-  decrPIXARR_looper(50);
+  incrPIXARR_looper(50);
+  decrPIXARR_looper(100);
   initPIXARR_sparse(5);
   incrPIXARR_looper(50);
-  decrPIXARR_looper(10);
-  scdisplay_PIXVector_linedots(200);
-  scdisplay_PIXVector_snake(8 , 8 , 162);  // loop multiples of NUMPIX for smooth animation
+  decrPIXARR_looper(100);
+  scdisplay_PIXVector_linedots(1000);
+  scdisplay_PIXVector_snake(8 , 8 , 100);  // loop multiples of NUMPIX for smooth animation
+  scdisplay_PIXVector_snake(8 , 8 , 100);  // loop multiples of NUMPIX for smooth animation
   incrPIXARR_looper(75);
   decrPIXARR_looper(75);
   initPIXARR_rand();
