@@ -128,7 +128,6 @@ void scdisplay_rainbow(int16_t duration) {
     hue++;
   }
 }
-
 //scdisplay_PopInFadeOut() - self contained display - pops in random pixels, slowly fades them out, the puts it to sleep for a random interval.  Loops for 'duration'
 void scdisplay_PopInFadeOut(int16_t duration) {
   initPIXARR_null();
@@ -296,11 +295,11 @@ void scdisplay_PIXVector_snake(int16_t length, int16_t snakes, int16_t duration)
 
 //PIXARR_toWhite() - increment all pixels to solid white
 void PIXARR_toWhite() {
-  for (uint8_t w = 0; w < NUMPIX; w++) {
-     for (uint8_t p = 0; p < NUMPIX; p++) {
-        if (PIXARR[p].R < 255) PIXARR[p].R++;
-        if (PIXARR[p].G < 255) PIXARR[p].G++;
-        if (PIXARR[p].B < 255) PIXARR[p].B++;
+  for (uint16_t w = 0; w < 300; w++) {
+     for (uint16_t p = 0; p < NUMPIX; p++) {
+        if (PIXARR[p].R < 255) PIXARR[p].R++;  
+        if (PIXARR[p].G < 255) PIXARR[p].G++;  
+        if (PIXARR[p].B < 255) PIXARR[p].B++;  
      }
      strip_FlushAndDisplay();
      delay(20);
@@ -487,6 +486,7 @@ void decrPIXARR_looper(int16_t times) {
 // program setup
 void setup() {
   FastLED.addLeds<WS2811, 3, RGB>(leds, NUMPIX);
+  FastLED.addLeds<WS2811, 4, RGB>(leds, NUMPIX);
   Serial.begin(9600);
   Serial.println("startup");
   delay(5000);
@@ -494,6 +494,23 @@ void setup() {
 
 // -----------  main application loop
 void loop() {
+/*
+//  DEBUGGING FADE / RAINBOW LOOP 
+  PIXARR_toWhite();
+  initPIXARR_null();
+  PIXARR_toWhite();
+  scdisplay_rainbow(1600);
+  initPIXARR_null();
+  PIXARR_toWhite();
+  scdisplay_rainbow(1600);
+  initPIXARR_null();
+  PIXARR_toWhite();
+  scdisplay_rainbow(1600);
+  initPIXARR_null();
+  PIXARR_toWhite();
+  scdisplay_rainbow(1600);
+  initPIXARR_null();
+*/ 
   scdisplay_PIXVector_snake(8 , 8 , 800);  // loop multiples of NUMPIX for smooth animation
   scdisplay_PIXVector_snake(4 , 12 , 400);  // loop multiples of NUMPIX for smooth animation
   scdisplay_PIXVector_snake(2 , 25 , 400);  // loop multiples of NUMPIX for smooth animation
@@ -523,7 +540,6 @@ void loop() {
   decrPIXARR_looper(50);
 
   PIXARR_toWhite();
-  
   scdisplay_rainbow(1600);
 }
 
